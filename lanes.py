@@ -3,10 +3,13 @@
 Created on Tue Jul 16 15:43:44 2019
 
 @author: William Wakefield
+Original Code and Tutorial Taught at:
+    https://www.skillshare.com/classes/Self-Driving-Cars-Tutorial-Identify-Lane-Lines-with-OpenCV-Python/1987379716/projects
 """
 import cv2
 import numpy as np
 #import matplotlib.pyplot as plt
+
 
 def make_coordinates(image, line_parameters):
     slope, intercept = line_parameters
@@ -41,6 +44,7 @@ includes the GaussianBlur function.
 The GaussianBlur function call is redudancy. 
 
 """    
+
 def canny(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     blur = cv2.GaussianBlur(gray, (5,5),0)  
@@ -64,29 +68,45 @@ def region_of_interest(image):
     masked_image = cv2.bitwise_and(image, mask) #takes original image and masks them based on mask
     return masked_image
     
-image = cv2.imread('test_image.jpg')
-lane_image = np.copy(image)
-canny_image = canny(lane_image)
-cropped_image = region_of_interest(canny_image)
-lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5) #2nd and 3rd args represent size of bins for creating line of best fit from Hough space. 4th argument is threshold; 
-#Threshold is minimum number of votes/intersections needed to detect a line; 5th artgument is placceholder array (empty); 
-averaged_lines = average_slope_intercept(lane_image, lines)
-line_image =  display_lines(lane_image, averaged_lines)
-combined_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
-"""
-plt.imshow(lane_image)
-plt.show()
-cv2.imshow('Original Image', image)
-cv2.waitKey(1000)
-cv2.imshow('Canny Image', canny_image)
-cv2.waitKey(1000)
-cv2.imshow('Region of Interest', region_of_interest(image))
-cv2.waitKey(1000)
-cv2.imshow('Lane Lines Detected', line_image)
-cv2.waitKey(1000)
-"""
-cv2.imshow('Final Result', combined_image)
-#cv2.waitKey(1000)
-cv2.waitKey(0)
+# =============================================================================
+# image = cv2.imread('test_image.jpg')
+# lane_image = np.copy(image)
+# canny_image = canny(lane_image)
+# cropped_image = region_of_interest(canny_image)
+# lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5) #2nd and 3rd args represent size of bins for creating line of best fit from Hough space. 4th argument is threshold; 
+# #Threshold is minimum number of votes/intersections needed to detect a line; 5th artgument is placceholder array (empty); 
+# averaged_lines = average_slope_intercept(lane_image, lines)
+# line_image =  display_lines(lane_image, averaged_lines)
+# combined_image = cv2.addWeighted(lane_image, 0.8, line_image, 1, 1)
+# 
+# plt.imshow(lane_image)
+# plt.show()
+# cv2.imshow('Original Image', image)
+# cv2.waitKey(1000)
+# cv2.imshow('Canny Image', canny_image)
+# cv2.waitKey(1000)
+# cv2.imshow('Region of Interest', region_of_interest(image))
+# cv2.waitKey(1000)
+# cv2.imshow('Lane Lines Detected', line_image)
+# cv2.waitKey(1000)
+# 
+# cv2.imshow('Final Result', combined_image)
+# #cv2.waitKey(1000)
+# cv2.waitKey(0)
+# =============================================================================
 
-
+cap = cv2.VideoCapture("test2.mp4")
+while(cap.isOpened()):
+    _, frame = cap.read()
+    canny_image = canny(frame)
+    cropped_image = region_of_interest(canny_image)
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)   
+    averaged_lines = average_slope_intercept(frame, lines)
+    line_image =  display_lines(frame, averaged_lines)
+    combined_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1) 
+    cv2.imshow('Final Result', combined_image)
+    if cv2.waitKey(1) & 0xFF == ord('q'): #ord takes value from keyboard
+        break
+cap.release()
+cv2.destroyAllWindows()
+        
